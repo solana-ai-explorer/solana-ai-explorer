@@ -104,6 +104,8 @@
     "@elizaos-plugins/adapter-sqlite": "workspace:*",
     "@elizaos/plugin-solana": "0.25.6-alpha.1",
     "@injectivelabs/sdk-ts": "^1.14.33",
+    "@modelcontextprotocol/sdk": "^1.11.1",
+    "@playwright/mcp": "^0.0.22",
     "@vitest/eslint-plugin": "1.0.1",
     "amqplib": "0.10.5",
     "bs58": "4.0.0",
