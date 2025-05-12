@@ -1,9 +1,7 @@
 import type { Plugin } from '@elizaos/core';
 import { actions } from './actions/actions';
 import { PlaywrightService } from './service/plugin-service';
-
-export const PLAYWRIGHT_SERVICE_NAME = 'PLAYWRIGHT';
-
+import { PLAYWRIGHT_SERVICE_NAME } from './constants';
 // 创建服务实例
 const playwrightService = new PlaywrightService();
 

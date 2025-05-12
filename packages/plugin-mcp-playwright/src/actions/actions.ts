@@ -6,8 +6,11 @@ import {
   type IAgentRuntime,
   type Memory,
   type State,
+  ServiceType,
 } from '@elizaos/core';
 import { PlaywrightService } from '../service/plugin-service';
+import { PLAYWRIGHT_SERVICE_NAME } from '../constants';
+
 
 // 定义基础内容接口
 interface BrowserActionContent {
@@ -42,7 +45,7 @@ function isValidBrowserAction(content: BrowserActionContent, action: string): bo
 
 // 修改 handler 实现
 const getPlaywrightService = (runtime: IAgentRuntime): PlaywrightService => {
-  const service = runtime.getService(PLAYWRIGHT_SERVICE_NAME);
+  const service = runtime.getService(ServiceType.TRANSCRIPTION);
   if (!service || !(service instanceof PlaywrightService)) {
     throw new Error('Playwright service not found');
   }

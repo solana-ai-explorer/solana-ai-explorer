@@ -12,7 +12,7 @@ export class PlaywrightService extends Service {
   constructor() {
     super();
     this.mcpClient = new MCPClient({
-      serverUrl: process.env.MCP_SERVER_URL || 'http://localhost:13000/sse',
+      serverUrl: process.env.MCP_SERVER_URL || 'http://localhost:13000/mcp',
       browserType: 'chromium',
       headless: true
     });
@@ -23,11 +23,23 @@ export class PlaywrightService extends Service {
   }
 
   async initialize(): Promise<void> {
-    await this.mcpClient.initialize();
+    try {
+      await this.mcpClient.initialize();
+      elizaLogger.info('PlaywrightService initialized successfully');
+    } catch (error) {
+      elizaLogger.error('Failed to initialize PlaywrightService:', error);
+      throw error;
+    }
   }
 
   async destroy(): Promise<void> {
-    await this.mcpClient.close();
+    try {
+      await this.mcpClient.close();
+      elizaLogger.info('PlaywrightService destroyed successfully');
+    } catch (error) {
+      elizaLogger.error('Error destroying PlaywrightService:', error);
+      throw error;
+    }
   }
 
   getClient(): MCPClient {
