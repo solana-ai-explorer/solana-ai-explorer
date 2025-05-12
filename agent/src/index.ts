@@ -660,8 +660,6 @@ export async function createAgent(
     token: string
 ): Promise<AgentRuntime> {
     elizaLogger.log(`Creating runtime for character ${character.name}`);
-    const mcpPlugin = new McpPlugin();
-    await mcpPlugin.initialize({ headless: false });
 
     return new AgentRuntime({
         token,

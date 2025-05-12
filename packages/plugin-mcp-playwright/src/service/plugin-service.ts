@@ -7,15 +7,19 @@ import {
 } from "@elizaos/core";
 
 export class PlaywrightService extends Service {
-  static serviceType: ServiceType = ServiceType.TRANSCRIPTION;
   private mcpClient: MCPClient;
 
   constructor() {
+    super();
     this.mcpClient = new MCPClient({
-      serverUrl: process.env.MCP_SERVER_URL || 'http://localhost:13000',
+      serverUrl: process.env.MCP_SERVER_URL || 'http://localhost:13000/sse',
       browserType: 'chromium',
       headless: true
     });
+  }
+
+  get serviceType(): ServiceType {
+    return ServiceType.TRANSCRIPTION;
   }
 
   async initialize(): Promise<void> {

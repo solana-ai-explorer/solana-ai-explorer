@@ -1,104 +1,101 @@
-import axios from 'axios';
-import { logger } from '@elizaos/core';
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { SSEClientTransport } from "@modelcontextprotocol/sdk/client/sse.js";
+import { elizaLogger } from "@elizaos/core";
 
 export interface MCPClientConfig {
-  serverUrl?: string;
-  browserType?: 'chromium' | 'firefox' | 'webkit';
-  headless?: boolean;
-  viewport?: {
-    width: number;
-    height: number;
-  };
+  serverUrl: string;
+  browserType: 'chromium' | 'firefox' | 'webkit';
+  headless: boolean;
 }
 
 export class MCPClient {
-  private serverUrl: string;
+  private client: Client;
+  private transport: SSEClientTransport;
   private config: MCPClientConfig;
-  private sessionId: string | null = null;
+  private isInitialized: boolean = false;
 
-  constructor(config: MCPClientConfig = {}) {
-    this.serverUrl = config.serverUrl || 'http://localhost:18080';
-    this.config = {
-      browserType: 'chromium',
-      headless: true,
-      viewport: { width: 1280, height: 720 },
-      ...config
+  constructor(config: MCPClientConfig) {
+    this.config = config;
+    const baseUrl = new URL(config.serverUrl);
+    
+    // 确保使用 SSE 端点
+    if (!baseUrl.pathname.endsWith('/sse')) {
+      baseUrl.pathname = '/sse';
+    }
+
+    this.transport = new SSEClientTransport(baseUrl);
+    this.client = new Client({
+      name: 'elizaos-playwright-plugin',
+      version: '1.0.0'
+    });
+
+    this.client.onerror = (error) => {
+      elizaLogger.error('MCP client error:', error);
     };
   }
 
   async initialize(): Promise<void> {
+    if (this.isInitialized) {
+      return;
+    }
+
     try {
-      const response = await axios.post(`${this.serverUrl}/session`, {
-        browserType: this.config.browserType,
-        headless: this.config.headless,
-        viewport: this.config.viewport
-      });
+      await this.client.connect(this.transport);
+      elizaLogger.info('Successfully connected to MCP server');
       
-      this.sessionId = response.data.sessionId;
-      logger.log('MCP session initialized:', this.sessionId);
+      // 验证连接
+      const tools = await this.listTools();
+      elizaLogger.info('Available tools:', tools);
+      
+      this.isInitialized = true;
     } catch (error) {
-      logger.error('Failed to initialize MCP session:', error);
+      elizaLogger.error('Failed to initialize MCP client:', error);
       throw error;
     }
-  }
-
-  async navigate(url: string): Promise<void> {
-    await this.post('/navigate', { url });
-  }
-
-  async click(selector: string): Promise<void> {
-    await this.post('/click', { selector });
-  }
-
-  async type(selector: string, text: string): Promise<void> {
-    await this.post('/type', { selector, text });
-  }
-
-  async select(selector: string, value: string): Promise<void> {
-    await this.post('/select', { selector, value });
-  }
-
-  async screenshot(path: string): Promise<void> {
-    const response = await this.post('/screenshot', {});
-    // 保存截图
-    await this.saveScreenshot(response.data, path);
-  }
-
-  async waitForSelector(selector: string, options?: { timeout?: number }): Promise<void> {
-    await this.post('/waitForSelector', { selector, options });
-  }
-
-  async evaluate(script: string): Promise<any> {
-    const response = await this.post('/evaluate', { script });
-    return response.data;
   }
 
   async close(): Promise<void> {
-    if (this.sessionId) {
-      await axios.delete(`${this.serverUrl}/session/${this.sessionId}`);
-      this.sessionId = null;
+    if (this.isInitialized) {
+      await this.transport.close();
+      this.isInitialized = false;
     }
   }
 
-  private async post(endpoint: string, data: any): Promise<any> {
-    if (!this.sessionId) {
-      throw new Error('MCP session not initialized');
-    }
-
-    try {
-      const response = await axios.post(
-        `${this.serverUrl}/session/${this.sessionId}${endpoint}`,
-        data
-      );
-      return response.data;
-    } catch (error) {
-      logger.error(`MCP request failed (${endpoint}):`, error);
-      throw error;
-    }
+  async listTools() {
+    const result = await this.client.request({
+      method: 'tools/list',
+      params: {}
+    });
+    return result.tools;
   }
 
-  private async saveScreenshot(data: string, path: string): Promise<void> {
-    // 实现截图保存逻辑
-    // 这里需要将 base64 数据转换为文件
+  async callTool(name: string, args: Record<string, any>) {
+    const result = await this.client.request({
+      method: 'tools/call',
+      params: {
+        name,
+        arguments: args
+      }
+    });
+    return result;
+  }
+
+  async startBrowser() {
+    return this.callTool('start-browser', {
+      browserType: this.config.browserType,
+      headless: this.config.headless
+    });
+  }
+
+  async navigate(url: string) {
+    return this.callTool('navigate', { url });
+  }
+
+  async getScreenshot() {
+    return this.callTool('screenshot', {});
+  }
+
+  async getPageContent() {
+    return this.callTool('get-page-content', {});
   }
 }
