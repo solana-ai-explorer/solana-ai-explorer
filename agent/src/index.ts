@@ -23,6 +23,7 @@ import {
 import { defaultCharacter } from "./defaultCharacter.ts";
 
 import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
+import { solanaPlugin } from "@elizaos/plugin-solana";
 import JSON5 from "json5";
 
 import fs from "fs";
@@ -664,7 +665,8 @@ export async function createAgent(
         evaluators: [],
         character,
         // character.plugins are handled when clients are added
-        plugins: [bootstrapPlugin].flat().filter(Boolean),
+        // plugins: [bootstrapPlugin, solanaPlugin, nodePlugin].flat().filter(Boolean),
+        plugins: [bootstrapPlugin, solanaPlugin].flat().filter(Boolean),
         providers: [],
         managers: [],
         fetch: logFetch,
