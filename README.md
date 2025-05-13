@@ -101,7 +101,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - Website: [https://solana-ai-explorer.com](https://solana-ai-explorer.com)
 - Email: contact@solana-ai-explorer.com
-- Twitter: [@SolanaAIExplorer](https://twitter.com/SolanaAIExplorer)
+- Twitter: [@ChainMateSolana](https://twitter.com/ChainMateSolana)
 
 ---
 
