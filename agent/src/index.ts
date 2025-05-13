@@ -24,6 +24,7 @@ import { defaultCharacter } from "./defaultCharacter.ts";
 
 import { bootstrapPlugin } from "@elizaos/plugin-bootstrap";
 import { solanaPlugin } from "@elizaos/plugin-solana";
+import { playwrightPlugin } from '@elizaos/plugin-mcp-playwright';
 import JSON5 from "json5";
 
 import fs from "fs";
@@ -659,6 +660,7 @@ export async function createAgent(
     token: string
 ): Promise<AgentRuntime> {
     elizaLogger.log(`Creating runtime for character ${character.name}`);
+
     return new AgentRuntime({
         token,
         modelProvider: character.modelProvider,
@@ -666,7 +668,7 @@ export async function createAgent(
         character,
         // character.plugins are handled when clients are added
         // plugins: [bootstrapPlugin, solanaPlugin, nodePlugin].flat().filter(Boolean),
-        plugins: [bootstrapPlugin, solanaPlugin].flat().filter(Boolean),
+        plugins: [bootstrapPlugin, solanaPlugin, playwrightPlugin].flat().filter(Boolean),
         providers: [],
         managers: [],
         fetch: logFetch,

@@ -1,0 +1,2 @@
+
+export const PLAYWRIGHT_SERVICE_NAME = 'PLAYWRIGHT';
